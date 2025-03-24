@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/style.css">
+  <title>Apartment Price Prediction</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    h2 {
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="number"], input[type="checkbox"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f4f4f4;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Apartment Price Prediction</h2>
+
+    <div class="form-group">
+      <label for="size">Size (in sq. ft.)</label>
+      <input type="number" id="size" placeholder="Enter apartment size">
+    </div>
+
+    <div class="form-group">
+      <label for="location">Location</label>
+      <input type="text" id="location" placeholder="Enter location">
+    </div>
+
+    <div class="form-group">
+      <label for="num_rooms">Number of Rooms</label>
+      <input type="number" id="num_rooms" placeholder="Enter number of rooms">
+    </div>
+
+    <div class="form-group">
+      <label for="has_garden">Has Garden</label>
+      <input type="checkbox" id="has_garden">
+    </div>
+
+    <button onclick="predictPrice()">Predict Price</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    async function predictPrice() {
+      const size = document.getElementById('size').value;
+      const location = document.getElementById('location').value;
+      const num_rooms = document.getElementById('num_rooms').value;
+      const has_garden = document.getElementById('has_garden').checked;
+
+      // Validate inputs
+      if (!size || !location || !num_rooms) {
+        alert("Please fill in all fields");
+        return;
+      }
+
+      const data = {
+        size: parseFloat(size),
+        location: location,
+        num_rooms: parseInt(num_rooms),
+        has_garden: has_garden
+      };
+
+      try {
+        // Send POST request to FastAPI backend
+        const response = await fetch('http://127.0.0.1:8000/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        // Show result
+        if (result.predicted_price) {
+          document.getElementById('result').innerHTML = `Predicted Price: $${result.predicted_price}`;
+        } else {
+          document.getElementById('result').innerHTML = `Error: ${result.error}`;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('result').innerHTML = 'An error occurred while fetching the data.';
+      }
+    }
+  </script>
+
+</body>
+</html>
